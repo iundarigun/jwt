@@ -1,6 +1,6 @@
 package br.com.devcave.jwt.security;
 
-import br.com.devcave.jwt.domain.Role;
+import br.com.devcave.jwt.domain.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
 public class JwtTokenProvider {
 
     @Value("${security.jwt.token.secret-key:secret}")

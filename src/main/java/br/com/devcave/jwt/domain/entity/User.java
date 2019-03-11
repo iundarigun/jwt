@@ -1,4 +1,4 @@
-package br.com.devcave.jwt.domain;
+package br.com.devcave.jwt.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

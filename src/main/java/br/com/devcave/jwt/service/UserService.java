@@ -1,7 +1,9 @@
 package br.com.devcave.jwt.service;
 
-import br.com.devcave.jwt.domain.Role;
-import br.com.devcave.jwt.domain.User;
+import br.com.devcave.jwt.domain.entity.Role;
+import br.com.devcave.jwt.domain.entity.User;
+import br.com.devcave.jwt.domain.request.UserRequest;
+import br.com.devcave.jwt.exception.UsernameInUseException;
 import br.com.devcave.jwt.repository.RoleRepository;
 import br.com.devcave.jwt.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,8 +31,15 @@ public class UserService implements UserDetailsService {
 
     private PasswordEncoder bCryptPasswordEncoder;
 
-    public void saveUser(User user) {
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    @Transactional
+    public void saveUser(UserRequest userRequest) {
+        if (userRepository.findByEmail(userRequest.getEmail()) !=null){
+            throw new UsernameInUseException();
+        }
+        User user = new User();
+        user.setEmail(userRequest.getEmail());
+        user.setName(userRequest.getName());
+        user.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
         user.setEnabled(true);
         Role userRole = roleRepository.findByRole("ADMIN");
         user.setRoleList(List.of(userRole));
@@ -37,6 +47,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username);
         if(user != null) {
@@ -59,5 +70,10 @@ public class UserService implements UserDetailsService {
 
     private UserDetails buildUserForAuthentication(User user, List<GrantedAuthority> authorities) {
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
+    }
+
+    @Transactional(readOnly = true)
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
