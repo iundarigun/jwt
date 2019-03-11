@@ -6,7 +6,13 @@ import br.com.devcave.jwt.domain.request.UserRequest;
 import br.com.devcave.jwt.exception.UsernameInUseException;
 import br.com.devcave.jwt.repository.RoleRepository;
 import br.com.devcave.jwt.repository.UserRepository;
+import br.com.devcave.jwt.security.AuthData;
+import br.com.devcave.jwt.security.JwtTokenProvider;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,9 +37,14 @@ public class UserService implements UserDetailsService {
 
     private PasswordEncoder bCryptPasswordEncoder;
 
+    private AuthenticationManager authenticationManager;
+
+    private JwtTokenProvider jwtTokenProvider;
+
+
     @Transactional
     public void saveUser(UserRequest userRequest) {
-        if (userRepository.findByEmail(userRequest.getEmail()) !=null){
+        if (userRepository.findByEmail(userRequest.getEmail()) != null) {
             throw new UsernameInUseException();
         }
         User user = new User();
@@ -50,7 +61,7 @@ public class UserService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username);
-        if(user != null) {
+        if (user != null) {
             List<GrantedAuthority> authorities = getUserAuthority(user.getRoleList());
             return buildUserForAuthentication(user, authorities);
         } else {
@@ -75,5 +86,15 @@ public class UserService implements UserDetailsService {
     @Transactional(readOnly = true)
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public String authenticateAndGenerateToken(AuthData data) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(data.getEmail(), data.getPassword()));
+            return jwtTokenProvider.createToken(data.getEmail(), findByEmail(data.getEmail()).getRoleList());
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("Invalid email/password supplied");
+        }
     }
 }
