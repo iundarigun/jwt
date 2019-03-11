@@ -37,11 +37,6 @@ public class UserService implements UserDetailsService {
 
     private PasswordEncoder bCryptPasswordEncoder;
 
-    private AuthenticationManager authenticationManager;
-
-    private JwtTokenProvider jwtTokenProvider;
-
-
     @Transactional
     public void saveUser(UserRequest userRequest) {
         if (userRepository.findByEmail(userRequest.getEmail()) != null) {
@@ -88,13 +83,4 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email);
     }
 
-    @Transactional(readOnly = true)
-    public String authenticateAndGenerateToken(AuthData data) {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(data.getEmail(), data.getPassword()));
-            return jwtTokenProvider.createToken(data.getEmail(), findByEmail(data.getEmail()).getRoleList());
-        } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid email/password supplied");
-        }
-    }
 }

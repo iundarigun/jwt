@@ -2,6 +2,7 @@ package br.com.devcave.jwt.controller;
 
 import br.com.devcave.jwt.domain.request.UserRequest;
 import br.com.devcave.jwt.security.AuthData;
+import br.com.devcave.jwt.security.AuthService;
 import br.com.devcave.jwt.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -23,6 +24,8 @@ public class UserController {
 
     private UserService userService;
 
+    private AuthService authService;
+
     @PostMapping("/register")
     public HttpEntity<?> register(@Valid @RequestBody UserRequest user) {
         userService.saveUser(user);
@@ -37,7 +40,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity login(@Valid @RequestBody AuthData data) {
-        String token = userService.authenticateAndGenerateToken(data);
+        String token = authService.authenticateAndGenerateToken(data);
         Map<Object, Object> model = new HashMap<>();
         model.put("username", data.getEmail());
         model.put("token", token);

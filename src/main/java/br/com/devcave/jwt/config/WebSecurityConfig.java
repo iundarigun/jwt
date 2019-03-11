@@ -59,9 +59,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth/login").permitAll()
                 .antMatchers("/auth/register").permitAll()
                 .antMatchers("/products/**").hasAuthority("ADMIN").anyRequest().authenticated().and().csrf()
-                .disable().exceptionHandling()
+                .disable()
+                .exceptionHandling()
                 .authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                        "Unauthorized")).and()
+                        "Unauthorized"))
+                .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));
     }
 }

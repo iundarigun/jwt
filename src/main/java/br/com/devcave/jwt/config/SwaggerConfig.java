@@ -21,11 +21,22 @@ import java.util.List;
 @EnableSwagger2
 public class SwaggerConfig {
     @Bean
-    public Docket swaggerSettings() {
+    public Docket swaggerAuth() {
         return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("Auth")
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("br.com.devcave.jwt.controller"))
-                .paths(PathSelectors.any())
+                .paths(PathSelectors.ant("/auth/**"))
+                .build();
+    }
+
+    @Bean
+    public Docket swaggerProducts() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("Products")
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("br.com.devcave.jwt.controller"))
+                .paths(PathSelectors.ant("/products/**"))
                 .build()
                 .securityContexts(List.of(securityContext()))
                 .securitySchemes(List.of(apiKey()));
@@ -42,17 +53,8 @@ public class SwaggerConfig {
 
     private SecurityContext securityContext() {
         return SecurityContext.builder()
-                .securityReferences(defaultAuth())
-                .forPaths(PathSelectors.any())
+                .securityReferences(List.of(new SecurityReference("JWT", new AuthorizationScope[0])))
                 .build();
     }
 
-    private List<SecurityReference> defaultAuth() {
-        AuthorizationScope authorizationScope
-                = new AuthorizationScope("global", "accessEverything");
-        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-        authorizationScopes[0] = authorizationScope;
-        return List.of(
-                new SecurityReference("JWT", authorizationScopes));
-    }
 }
