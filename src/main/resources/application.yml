@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: preferences
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/jwt?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+
+server:
+  port: 1980

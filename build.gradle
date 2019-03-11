@@ -1,0 +1,44 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.0.BUILD-SNAPSHOT'
+	id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'br.com.devcave'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/snapshot' }
+	maven { url 'https://repo.spring.io/milestone' }
+}
+
+ext{
+	set('swaggerVersion', '2.9.2')
+	set('jwtVersion', '0.9.1')
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
+	implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+	implementation "io.jsonwebtoken:jjwt:${jwtVersion}"
+
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'mysql:mysql-connector-java'
+
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+}
