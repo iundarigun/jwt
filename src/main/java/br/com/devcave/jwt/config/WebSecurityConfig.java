@@ -1,8 +1,8 @@
 package br.com.devcave.jwt.config;
 
 
-import br.com.devcave.jwt.security.JwtConfigurer;
-import br.com.devcave.jwt.security.JwtTokenProvider;
+import br.com.devcave.jwt.security.JWTAuthenticationFilter;
+import br.com.devcave.jwt.security.JWTLoginFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import javax.servlet.http.HttpServletResponse;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -25,10 +24,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Override
+   @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
     }
@@ -58,12 +54,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/webjars/**").permitAll()
                 .antMatchers("/auth/login").permitAll()
                 .antMatchers("/auth/register").permitAll()
-                .antMatchers("/products/**").hasAuthority("ADMIN").anyRequest().authenticated().and().csrf()
-                .disable()
-                .exceptionHandling()
-                .authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                        "Unauthorized"))
+                .antMatchers("/products/**")
+                .hasAuthority("ADMIN")
+                .anyRequest().authenticated()
                 .and()
-                .apply(new JwtConfigurer(jwtTokenProvider));
+                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager()),
+                        UsernamePasswordAuthenticationFilter.class)
+
+                // filtra outras requisições para verificar a presença do JWT no header
+                .addFilterBefore(new JWTAuthenticationFilter(),
+                        UsernamePasswordAuthenticationFilter.class);
     }
 }
