@@ -20,3 +20,7 @@ Start container next time:
 ```
 $ docker start local-mysql
 ```
+
+## References
+[1] https://www.djamware.com/post/5c819d0180aca754f7a9d1ee/securing-restful-api-with-spring-boot-security-and-data-mongodb
+[2] http://andreybleme.com/2017-04-01/autenticacao-com-jwt-no-spring-boot/
